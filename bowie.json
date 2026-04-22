@@ -1,0 +1,5 @@
+{
+  "name": "@bowie/bowie-logger",
+  "version": "0.1.0",
+  "description": "Levelled logger for Bowie applications"
+}

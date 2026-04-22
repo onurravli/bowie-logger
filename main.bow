@@ -1,0 +1,69 @@
+export const DEBUG = 0
+export const INFO  = 1
+export const WARN  = 2
+export const ERROR = 3
+
+const LEVEL_LABELS = ["DEBUG", "INFO", "WARN", "ERROR"]
+
+const ESC = 27
+const RESET  = sprintf("%c[0m",  ESC)
+const C_DEBUG = sprintf("%c[36m", ESC)
+const C_INFO  = sprintf("%c[32m", ESC)
+const C_WARN  = sprintf("%c[33m", ESC)
+const C_ERROR = sprintf("%c[31m", ESC)
+
+const LEVEL_COLORS = [C_DEBUG, C_INFO, C_WARN, C_ERROR]
+
+let current_level = INFO
+
+export fn set_level(level) {
+  current_level = level
+}
+
+export fn get_level() {
+  return current_level
+}
+
+fn fmt(level_index, name, msg) {
+  let color = LEVEL_COLORS[level_index]
+  let label = LEVEL_LABELS[level_index]
+  if name {
+    return sprintf("%s[%s]%s [%s] %s", color, label, RESET, name, str(msg))
+  }
+  return sprintf("%s[%s]%s %s", color, label, RESET, str(msg))
+}
+
+# Returns a logger instance with debug/info/warn/error methods.
+# Pass a name string to tag all output, or null for no tag.
+#
+# Usage:
+#   let log = create_logger("server")
+#   log.info("started")
+#   log.error("something broke")
+export fn create_logger(name) {
+  return {
+    "debug": fn(msg) {
+      if current_level <= DEBUG {
+        println(fmt(DEBUG, name, msg))
+      }
+    },
+    "info": fn(msg) {
+      if current_level <= INFO {
+        println(fmt(INFO, name, msg))
+      }
+    },
+    "warn": fn(msg) {
+      if current_level <= WARN {
+        println(fmt(WARN, name, msg))
+      }
+    },
+    "error": fn(msg) {
+      if current_level <= ERROR {
+        eprint(fmt(ERROR, name, msg))
+      }
+    }
+  }
+}
+
+# A ready-to-use default logger with no name tag.
+export let log = create_logger(null)
