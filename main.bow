@@ -5,8 +5,8 @@ export const ERROR = 3
 
 const LEVEL_LABELS = ["DEBUG", "INFO", "WARN", "ERROR"]
 
-const ESC = 27
-const RESET  = sprintf("%c[0m",  ESC)
+const ESC     = 27
+const RESET   = sprintf("%c[0m",  ESC)
 const C_DEBUG = sprintf("%c[36m", ESC)
 const C_INFO  = sprintf("%c[32m", ESC)
 const C_WARN  = sprintf("%c[33m", ESC)
@@ -24,13 +24,15 @@ export fn get_level() {
   return current_level
 }
 
-fn fmt(level_index, name, msg) {
+fn fmt(level_index, name, format, args) {
   let color = LEVEL_COLORS[level_index]
   let label = LEVEL_LABELS[level_index]
+  let msg = str(format)
+  if len(args) > 0 { msg = vsprintf(format, args) }
   if name {
-    return sprintf("%s[%s]%s [%s] %s", color, label, RESET, name, str(msg))
+    return sprintf("%s[%s]%s [%s] %s", color, label, RESET, name, msg)
   }
-  return sprintf("%s[%s]%s %s", color, label, RESET, str(msg))
+  return sprintf("%s[%s]%s %s", color, label, RESET, msg)
 }
 
 # Returns a logger instance with debug/info/warn/error methods.
@@ -38,28 +40,28 @@ fn fmt(level_index, name, msg) {
 #
 # Usage:
 #   let log = create_logger("server")
-#   log.info("started")
-#   log.error("something broke")
+#   log.info("listening on port %d", port)
+#   log.error("query failed: %s", err)
 export fn create_logger(name) {
   return {
-    "debug": fn(msg) {
+    "debug": fn(format, ...args) {
       if current_level <= DEBUG {
-        println(fmt(DEBUG, name, msg))
+        println(fmt(DEBUG, name, format, args))
       }
     },
-    "info": fn(msg) {
+    "info": fn(format, ...args) {
       if current_level <= INFO {
-        println(fmt(INFO, name, msg))
+        println(fmt(INFO, name, format, args))
       }
     },
-    "warn": fn(msg) {
+    "warn": fn(format, ...args) {
       if current_level <= WARN {
-        println(fmt(WARN, name, msg))
+        println(fmt(WARN, name, format, args))
       }
     },
-    "error": fn(msg) {
+    "error": fn(format, ...args) {
       if current_level <= ERROR {
-        eprint(fmt(ERROR, name, msg))
+        eprint(fmt(ERROR, name, format, args))
       }
     }
   }
